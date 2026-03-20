@@ -1,4 +1,4 @@
-import React from 'react';
+
 import type { ConnectionStatus } from '../hooks/useWebRTC';
 import { CheckCircle2, AlertCircle, Wifi, Loader2 } from 'lucide-react';
 

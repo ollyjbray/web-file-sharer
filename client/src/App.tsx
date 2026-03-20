@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useWebRTC } from './hooks/useWebRTC';
 import { DropZone } from './components/DropZone';
 import { ProgressBar } from './components/ProgressBar';
