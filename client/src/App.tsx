@@ -64,18 +64,18 @@ function App() {
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
               </div>
 
-              <div className="flex w-full space-x-3">
+              <div className="flex flex-col sm:flex-row w-full gap-3">
                 <input
                   type="text"
                   placeholder="Enter Room Code"
-                  className="flex-1 bg-black/20 border border-white/5 text-white px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all text-center tracking-widest font-mono text-lg"
+                  className="flex-1 min-w-0 bg-black/20 border border-white/5 text-white px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all text-center tracking-widest font-mono text-lg"
                   value={joinId}
                   onChange={(e) => setJoinId(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleJoinClick()}
                 />
                 <button
                   onClick={handleJoinClick}
-                  className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20 uppercase tracking-wide text-sm"
+                  className="w-full sm:w-auto px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20 uppercase tracking-wide text-sm"
                 >
                   Join
                 </button>
