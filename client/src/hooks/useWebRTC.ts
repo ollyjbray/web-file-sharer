@@ -123,7 +123,10 @@ export function useWebRTC() {
   const connect = useCallback((targetRoomId?: string) => {
     setStatus('Connecting');
     // Connect to local signaling server
-    const socket = io('http://localhost:3001');
+    const SIGNAL_URL = import.meta.env.DEV
+      ? 'http://localhost:3001'
+      : 'https://web-file-sharer-production.up.railway.app';
+    const socket = io(SIGNAL_URL);
     socketRef.current = socket;
 
     socket.on('connect', () => {
