@@ -6,14 +6,15 @@
   --color-primary-100: #ccfbf1;
   --color-primary-500: #14b8a6;
   --color-primary-600: #0d9488;
-  --color-background: #020617; /* Slate 950 */
-  --color-surface: #0f172a; /* Slate 900 */
-  --color-surface-glass: rgba(15, 23, 42, 0.6);
-  --color-text-main: #f8fafc;
-  --color-text-muted: #94a3b8;
-  --color-accent-blue: #3b82f6;
-  --color-accent-purple: #8b5cf6;
-  --color-accent-pink: #ec4899;
+  --color-background: #050510;
+  --color-surface: #0a0a1a;
+  --color-surface-raised: #111128;
+  --color-text-main: #f0f0f8;
+  --color-text-muted: #7a7a9a;
+  --color-accent-blue: #4f7df7;
+  --color-accent-purple: #9b6dff;
+  --color-accent-pink: #f06dcd;
+  --color-accent-cyan: #38d9f5;
 }
 
 body {
@@ -23,40 +24,186 @@ body {
   min-height: 100vh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
 
-/* Custom Animations */
-@keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
+/* ── Gradient mesh background ─────────────────────────── */
+@keyframes meshShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.animate-blob {
-  animation: blob 7s infinite;
+.gradient-mesh {
+  background: linear-gradient(
+    135deg,
+    rgba(79, 125, 247, 0.12) 0%,
+    rgba(155, 109, 255, 0.10) 25%,
+    rgba(240, 109, 205, 0.08) 50%,
+    rgba(56, 217, 245, 0.06) 75%,
+    rgba(79, 125, 247, 0.12) 100%
+  );
+  background-size: 400% 400%;
+  animation: meshShift 20s ease infinite;
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
+/* ── Split layout ─────────────────────────────────────── */
+.split-viewport {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+.hero-panel {
+  position: relative;
+  width: 42%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 3.5rem;
+  overflow: hidden;
 }
 
-/* Glass panel styling */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+.action-panel {
+  position: relative;
+  width: 58%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 4rem;
+  background: var(--color-surface);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ── Decorative divider ───────────────────────────────── */
+.panel-divider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(79, 125, 247, 0.3) 30%,
+    rgba(155, 109, 255, 0.5) 50%,
+    rgba(240, 109, 205, 0.3) 70%,
+    transparent 100%
+  );
+}
+
+/* ── Glass surface (for cards inside action panel) ────── */
+.surface-card {
+  background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
 }
 
-.glass-panel-light {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* ── Animated gradient border ─────────────────────────── */
+@keyframes borderRotate {
+  0%   { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  --angle: 0deg;
+  border: 1px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(var(--color-surface), var(--color-surface)),
+    conic-gradient(from var(--angle), rgba(79, 125, 247, 0.4), rgba(155, 109, 255, 0.4), rgba(240, 109, 205, 0.4), rgba(56, 217, 245, 0.4), rgba(79, 125, 247, 0.4));
+  animation: borderRotate 6s linear infinite;
+}
+
+/* ── Floating orb decoration ──────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-30px) scale(1.05); }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: var(--color-accent-purple);
+  top: -80px;
+  left: -60px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 250px;
+  height: 250px;
+  background: var(--color-accent-blue);
+  bottom: -60px;
+  right: -40px;
+  animation: float 10s ease-in-out infinite 2s;
+}
+
+.orb-3 {
+  width: 200px;
+  height: 200px;
+  background: var(--color-accent-pink);
+  top: 40%;
+  left: 50%;
+  animation: float 12s ease-in-out infinite 4s;
+}
+
+/* ── Fade-in animations ───────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+
+/* ── Responsive: stack on mobile ──────────────────────── */
+@media (max-width: 768px) {
+  body {
+    overflow: auto;
+  }
+
+  .split-viewport {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .hero-panel {
+    width: 100%;
+    padding: 3rem 1.5rem 2rem;
+    min-height: unset;
+  }
+
+  .action-panel {
+    width: 100%;
+    padding: 2rem 1.5rem 3rem;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    flex: 1;
+  }
 }

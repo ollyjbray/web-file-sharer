@@ -29,15 +29,19 @@ export function DropZone({ onFileSelect, disabled }: DropZoneProps) {
     <div
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
-      className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden group
+      className={`relative rounded-2xl p-12 flex flex-col items-center justify-center transition-all duration-500 group overflow-hidden
         ${
           disabled
-            ? 'opacity-50 cursor-not-allowed border-white/5 bg-black/20'
-            : 'cursor-pointer border-blue-400/30 hover:border-blue-400/60 bg-white/5 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]'
+            ? 'opacity-40 cursor-not-allowed border border-white/[0.04] bg-white/[0.01]'
+            : 'cursor-pointer gradient-border hover:shadow-[0_0_40px_rgba(79,125,247,0.08)]'
         }
       `}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      {/* Hover glow layer */}
+      {!disabled && (
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent-blue)]/[0.04] via-transparent to-[var(--color-accent-purple)]/[0.04] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      )}
+
       <input
         type="file"
         id="fileInput"
@@ -45,18 +49,34 @@ export function DropZone({ onFileSelect, disabled }: DropZoneProps) {
         onChange={onChange}
         disabled={disabled}
       />
+
       <label
         htmlFor="fileInput"
         className={`flex flex-col items-center relative z-10 ${disabled ? '' : 'cursor-pointer'}`}
       >
-        <div className={`p-4 rounded-full mb-6 transition-transform duration-300 ${disabled ? 'bg-white/5' : 'bg-blue-500/10 group-hover:scale-110 group-hover:bg-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.2)]'}`}>
-          <UploadCloud className={`w-12 h-12 ${disabled ? 'text-slate-500' : 'text-blue-400'}`} strokeWidth={1.5} />
+        <div
+          className={`p-5 rounded-2xl mb-6 transition-all duration-500
+            ${disabled
+              ? 'bg-white/[0.03]'
+              : 'bg-[var(--color-accent-blue)]/[0.08] group-hover:bg-[var(--color-accent-blue)]/[0.15] group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(79,125,247,0.15)]'
+            }`}
+        >
+          <UploadCloud
+            className={`w-10 h-10 transition-colors duration-300 ${
+              disabled ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-accent-blue)] group-hover:text-white'
+            }`}
+            strokeWidth={1.5}
+          />
         </div>
-        <p className="text-white font-medium text-xl text-center tracking-wide">
-          {disabled ? 'Transfer in Progress' : 'Drag & Drop your file'}
+
+        <p className="text-white/90 font-medium text-lg tracking-wide">
+          {disabled ? 'Waiting for connection…' : 'Drag & drop your file'}
         </p>
+
         {!disabled && (
-          <p className="text-blue-300/80 text-sm mt-3 font-light tracking-wider uppercase">or click to browse</p>
+          <p className="text-[var(--color-text-muted)] text-xs mt-3 tracking-[0.2em] uppercase font-medium">
+            or click to browse
+          </p>
         )}
       </label>
     </div>

@@ -3,11 +3,12 @@ import { useWebRTC } from './hooks/useWebRTC';
 import { DropZone } from './components/DropZone';
 import { ProgressBar } from './components/ProgressBar';
 import { StatusIndicator } from './components/StatusIndicator';
-import { Share2 } from 'lucide-react';
+import { ArrowRight, Copy, Check } from 'lucide-react';
 
 function App() {
   const { status, progress, roomId, connect, sendFile, disconnect } = useWebRTC();
   const [joinId, setJoinId] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const handleShareClick = () => {
     connect();
@@ -19,110 +20,193 @@ function App() {
     }
   };
 
+  const handleCopyCode = () => {
+    if (roomId) {
+      navigator.clipboard.writeText(roomId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-[-10%] w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob pointer-events-none" />
-      <div className="absolute top-0 right-[-10%] w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000 pointer-events-none" />
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000 pointer-events-none" />
+    <div className="split-viewport">
 
-      <main className="w-full max-w-xl glass-panel rounded-[2rem] p-8 sm:p-10 z-10 relative overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none"></div>
+      {/* ─── Left: Hero Panel ─────────────────────────────── */}
+      <div className="hero-panel gradient-mesh">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
 
-        <header className="flex flex-col items-center mb-10 relative z-10">
-          <div className="p-4 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-2xl mb-5 border border-white/10 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
-            <Share2 className="w-12 h-12 text-blue-400" strokeWidth={1.5} />
+        <div className="relative z-10 flex flex-col gap-8">
+          {/* Branding */}
+          <div className="animate-fade-up">
+            <p className="text-sm font-semibold tracking-[0.3em] uppercase text-[var(--color-accent-cyan)] mb-4">
+              Peer-to-Peer
+            </p>
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-br from-white via-white/90 to-white/50">
+                Peer
+              </span>
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-accent-blue)] via-[var(--color-accent-purple)] to-[var(--color-accent-pink)]">
+                Share
+              </span>
+            </h1>
           </div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 tracking-tight mb-2">
-            PeerShare
-          </h1>
-          <p className="text-slate-400 text-center text-sm sm:text-base font-light tracking-wide max-w-xs">
-            Lightning fast, secure, peer-to-peer file sharing directly in your browser.
+
+          {/* Tagline */}
+          <p className="text-[var(--color-text-muted)] text-base sm:text-lg max-w-xs leading-relaxed animate-fade-up animate-delay-100">
+            Encrypted file transfers directly between browsers. No servers, no uploads, no limits.
           </p>
-        </header>
 
-        <div className="flex justify-center mb-8">
-          <StatusIndicator status={status} />
+          {/* Status pill */}
+          <div className="animate-fade-up animate-delay-200">
+            <StatusIndicator status={status} />
+          </div>
+
+          {/* Decorative info */}
+          <div className="mt-auto pt-12 animate-fade-up animate-delay-300">
+            <div className="flex gap-8 text-xs text-[var(--color-text-muted)] tracking-widest uppercase">
+              <span>WebRTC</span>
+              <span>·</span>
+              <span>E2E Encrypted</span>
+              <span>·</span>
+              <span>No File Limit</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {status === 'Disconnected' && (
-          <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col items-center p-6 sm:p-8 glass-panel-light rounded-2xl">
-              <button
-                onClick={handleShareClick}
-                className="group relative w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium text-lg rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  Create a Transfer Room
-                </span>
-              </button>
-              
-              <div className="flex w-full items-center text-slate-500 my-6">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
-                <span className="px-4 text-xs font-semibold tracking-widest text-slate-400 uppercase">or join</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+      {/* ─── Right: Action Panel ──────────────────────────── */}
+      <div className="action-panel">
+        <div className="panel-divider" />
+
+        {/* Disconnect button — top-right corner */}
+        {status !== 'Disconnected' && (
+          <button
+            onClick={disconnect}
+            className="absolute top-6 right-6 z-20 flex items-center gap-2 px-4 py-2 text-xs font-medium text-[var(--color-text-muted)] hover:text-red-400 rounded-full border border-white/5 hover:border-red-500/20 hover:bg-red-500/5 transition-all duration-300 tracking-widest uppercase"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            Leave
+          </button>
+        )}
+
+        <div className="relative z-10 flex flex-col gap-8 max-w-lg mx-auto w-full">
+
+          {/* ─── Disconnected state ────────────────────────── */}
+          {status === 'Disconnected' && (
+            <div className="flex flex-col gap-8">
+              {/* Section heading */}
+              <div className="animate-fade-up">
+                <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mb-2">
+                  Start sharing
+                </h2>
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  Create a room or join an existing one with a code.
+                </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row w-full gap-3">
+              {/* Create room button */}
+              <button
+                onClick={handleShareClick}
+                className="group relative w-full py-5 px-8 rounded-2xl font-medium text-lg text-white transition-all duration-300 overflow-hidden animate-fade-up animate-delay-100 gradient-border"
+                style={{
+                  background: 'linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple))',
+                }}
+              >
+                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  Create a Room
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
+
+              {/* Divider */}
+              <div className="flex items-center gap-4 animate-fade-up animate-delay-200">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                <span className="text-[10px] font-semibold tracking-[0.25em] text-[var(--color-text-muted)] uppercase">
+                  or join
+                </span>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              </div>
+
+              {/* Join room */}
+              <div className="flex gap-3 animate-fade-up animate-delay-300">
                 <input
                   type="text"
-                  placeholder="Enter Room Code"
-                  className="flex-1 min-w-0 bg-black/20 border border-white/5 text-white px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all text-center tracking-widest font-mono text-lg"
+                  placeholder="Room code"
+                  className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.06] text-white px-5 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-purple)]/40 focus:border-[var(--color-accent-purple)]/40 placeholder:text-[var(--color-text-muted)] transition-all text-center tracking-[0.15em] font-mono text-lg"
                   value={joinId}
                   onChange={(e) => setJoinId(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleJoinClick()}
                 />
                 <button
                   onClick={handleJoinClick}
-                  className="w-full sm:w-auto px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20 uppercase tracking-wide text-sm"
+                  className="px-6 py-4 bg-white/[0.04] hover:bg-white/[0.08] text-white font-medium rounded-xl transition-all duration-200 border border-white/[0.06] hover:border-white/[0.12] text-sm tracking-widest uppercase"
                 >
                   Join
                 </button>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {(status !== 'Disconnected') && (
-          <div className="space-y-6 relative z-10 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-500">
-            {roomId && (
-              <div className="relative overflow-hidden text-center p-6 glass-panel-light rounded-2xl group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-50"></div>
-                <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-2">Your Room Code</p>
-                <div className="inline-block bg-black/30 px-6 py-2 rounded-lg border border-white/5 shadow-inner">
-                  <p className="text-3xl font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 tracking-[0.2em] font-bold select-all cursor-pointer">{roomId}</p>
-                </div>
-                {status === 'Connecting' && (
-                  <p className="text-sm text-slate-400 mt-4 animate-pulse flex justify-center items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></span>
-                    Waiting for another peer...
+          {/* ─── Connected / Connecting / Transferring ─────── */}
+          {status !== 'Disconnected' && (
+            <div className="flex flex-col gap-8">
+
+              {/* Room code display */}
+              {roomId && (
+                <div className="animate-fade-up">
+                  <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.2em] font-semibold mb-4">
+                    Room Code
                   </p>
-                )}
+                  <div
+                    onClick={handleCopyCode}
+                    className="group surface-card flex items-center justify-between px-6 py-5 cursor-pointer hover:border-white/10 transition-all duration-300"
+                  >
+                    <span className="text-3xl sm:text-4xl font-mono font-bold tracking-[0.15em] bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-accent-blue)] to-[var(--color-accent-purple)]">
+                      {roomId}
+                    </span>
+                    <span className="text-[var(--color-text-muted)] group-hover:text-white transition-colors">
+                      {copied ? (
+                        <Check className="w-5 h-5 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-5 h-5" />
+                      )}
+                    </span>
+                  </div>
+
+                  {status === 'Connecting' && (
+                    <div className="flex items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-accent-cyan)] opacity-60" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-accent-cyan)]" />
+                      </span>
+                      Waiting for peer to connect…
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Drop zone */}
+              <div className="animate-fade-up animate-delay-100">
+                <DropZone
+                  onFileSelect={sendFile}
+                  disabled={status !== 'Connected'}
+                />
               </div>
-            )}
 
-            <DropZone
-              onFileSelect={sendFile}
-              disabled={status !== 'Connected'}
-            />
-
-            {(progress > 0 || status === 'Transferring') && (
-              <ProgressBar progress={progress} />
-            )}
-
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={disconnect}
-                className="group flex items-center gap-2 px-6 py-3 text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
-              >
-                <span className="w-2 h-2 rounded-full bg-slate-600 group-hover:bg-red-500 transition-colors"></span>
-                Disconnect & Leave Room
-              </button>
+              {/* Progress */}
+              {(progress > 0 || status === 'Transferring') && (
+                <div className="animate-fade-up animate-delay-200">
+                  <ProgressBar progress={progress} />
+                </div>
+              )}
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
