@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useWebRTC } from './hooks/useWebRTC';
 import { DropZone } from './components/DropZone';
 import { ProgressBar } from './components/ProgressBar';
 import { StatusIndicator } from './components/StatusIndicator';
-import { ArrowRight, Copy, Check } from 'lucide-react';
+import { ArrowRight, Copy, Check, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 function App() {
   const { status, progress, roomId, connect, sendFile, disconnect } = useWebRTC();
   const [joinId, setJoinId] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(true);
+  const autoJoinedRef = useRef(false);
+
+  // Auto-join from URL param (e.g. ?room=abc123 from QR scan)
+  useEffect(() => {
+    if (autoJoinedRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+    if (roomParam) {
+      autoJoinedRef.current = true;
+      // Clean the URL so refreshing doesn't re-join
+      window.history.replaceState({}, '', window.location.pathname);
+      connect(roomParam);
+    }
+  }, [connect]);
 
   const handleShareClick = () => {
     connect();
@@ -56,7 +72,7 @@ function App() {
 
           {/* Tagline */}
           <p className="text-[var(--color-text-muted)] text-base sm:text-lg max-w-xs leading-relaxed animate-fade-up animate-delay-100">
-            Encrypted file transfers directly between browsers. No servers, no uploads, no limits.
+            Encrypted file transfers directly between browsers.
           </p>
 
           {/* Status pill */}
@@ -158,9 +174,23 @@ function App() {
               {/* Room code display */}
               {roomId && (
                 <div className="animate-fade-up">
-                  <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.2em] font-semibold mb-4">
-                    Room Code
-                  </p>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.2em] font-semibold">
+                      Room Code
+                    </p>
+                    <button
+                      onClick={() => setShowQR(!showQR)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium tracking-wider uppercase transition-all duration-200 border ${
+                        showQR
+                          ? 'text-[var(--color-accent-cyan)] border-[var(--color-accent-cyan)]/20 bg-[var(--color-accent-cyan)]/5'
+                          : 'text-[var(--color-text-muted)] border-white/5 hover:border-white/10'
+                      }`}
+                    >
+                      <QrCode className="w-3.5 h-3.5" />
+                      QR
+                    </button>
+                  </div>
+
                   <div
                     onClick={handleCopyCode}
                     className="group surface-card flex items-center justify-between px-6 py-5 cursor-pointer hover:border-white/10 transition-all duration-300"
@@ -176,6 +206,24 @@ function App() {
                       )}
                     </span>
                   </div>
+
+                  {/* QR Code */}
+                  {showQR && (
+                    <div className="mt-4 surface-card p-6 flex flex-col items-center gap-4 animate-fade-up">
+                      <div className="bg-white p-3 rounded-xl">
+                        <QRCodeSVG
+                          value={`${window.location.origin}${window.location.pathname}?room=${roomId}`}
+                          size={160}
+                          bgColor="#ffffff"
+                          fgColor="#050510"
+                          level="M"
+                        />
+                      </div>
+                      <p className="text-xs text-[var(--color-text-muted)] tracking-wider">
+                        Scan to join this room
+                      </p>
+                    </div>
+                  )}
 
                   {status === 'Connecting' && (
                     <div className="flex items-center gap-3 mt-4 text-sm text-[var(--color-text-muted)]">

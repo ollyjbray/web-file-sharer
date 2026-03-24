@@ -32,19 +32,23 @@ export function useWebRTC() {
   const createPeer = () => {
     const peer = new RTCPeerConnection({
       iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
-      ]
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+      ],
     });
 
     peer.onicecandidate = (event) => {
       if (event.candidate && socketRef.current && roomIdRef.current) {
+        console.log('Sending ICE candidate:', event.candidate.candidate);
         socketRef.current.emit('ice-candidate', {
           target: roomIdRef.current, 
           candidate: event.candidate,
-          // In a real 1-to-1 app, we emit to the specific other peer. 
-          // Here, 'target' acts as room ID, so the server broadcasts.
         });
+      } else if (!event.candidate) {
+        console.log('ICE candidate gathering complete');
       }
     };
 
@@ -52,9 +56,25 @@ export function useWebRTC() {
       console.log('connectionState changed:', peer.connectionState);
       if (peer.connectionState === 'connected') {
         setStatus('Connected');
-      } else if (peer.connectionState === 'disconnected' || peer.connectionState === 'failed') {
-        setStatus('Disconnected');
+      } else if (peer.connectionState === 'failed') {
+        console.log('Connection failed, attempting ICE restart...');
+        peer.restartIce();
+      } else if (peer.connectionState === 'disconnected') {
+        // Give it a moment to recover before declaring disconnected
+        setTimeout(() => {
+          if (peer.connectionState === 'disconnected') {
+            setStatus('Disconnected');
+          }
+        }, 3000);
       }
+    };
+
+    peer.onicegatheringstatechange = () => {
+      console.log('ICE gathering state:', peer.iceGatheringState);
+    };
+
+    peer.oniceconnectionstatechange = () => {
+      console.log('ICE connection state:', peer.iceConnectionState);
     };
 
     // Handle receiving data channel
@@ -220,7 +240,7 @@ export function useWebRTC() {
         console.error('Error in socket.on ice-candidate:', err);
       }
     });
-  }, [roomId]);
+  }, []);
 
   const sendFile = useCallback((file: File) => {
     const channel = channelRef.current;
